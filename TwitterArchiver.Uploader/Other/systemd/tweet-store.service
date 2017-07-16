@@ -1,0 +1,19 @@
+﻿[Unit]
+Description=Tweet Store service
+Wants=network.target
+Wants=rabbitmq-server.service
+Wants=postgresql.service
+After=network.target
+After=rabbitmq-server.service
+After=postgresql.service
+
+[Service]
+User=tweetprocess
+Group=tweetprocess
+Restart=always
+WorkingDirectory=/var/lib/tweet-process/store
+ExecStart=/usr/bin/dotnet /usr/lib/tweet-store/TwitterArchiver.Uploader.dll
+Environment=TMPDIR=/var/lib/tweet-process/tmp
+
+[Install]
+WantedBy=multi-user.target
