@@ -1,0 +1,16 @@
+﻿{
+  "Logging": {
+    "IncludeScopes": false,
+    "LogLevel": {
+      "Default": "Debug"
+    }
+  },
+  "RabbitMq": {
+    "Uri": "amqp://localhost:5672/",
+    "Queue": "tweet.store",
+    "PrefertchSize": 8
+  },
+  "Database": {
+    "ConnectionString": "Host=localhost; Port=5432; Database=northern;"
+  }
+}

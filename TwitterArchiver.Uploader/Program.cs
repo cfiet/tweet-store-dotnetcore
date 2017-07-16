@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Data;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Data.Common;
 using System.Dynamic;
 using System.Text;
 
@@ -70,13 +69,24 @@ namespace TwitterArchiver.Uploader
             {
                 var rabbitConfig = serviceProvider.GetRequiredService<RabbitMqConfig>();
                 var queueConsumer = serviceProvider.GetRequiredService<EventingBasicConsumer>();
+
+                logger.LogInformation($"Conneting to RabbitMQ");
                 var channel = serviceProvider.GetRequiredService<IModel>();
                 queueConsumer.Received += CreateMessageHandler(serviceProvider, channel, logger);
 
+                logger.LogInformation($"Registering consumer for queue: {rabbitConfig.Queue}");
                 var consumerTag = channel.BasicConsume(rabbitConfig.Queue, false, queueConsumer);
+
                 logger.LogInformation($"Registered consumer {consumerTag}");
-                Console.ReadLine();
+
+                var waitEvent = new ManualResetEventSlim();
+                Console.CancelKeyPress += (s, ea) => waitEvent.Set();
+                logger.LogInformation($"Service is running, awaiting exit signal");
+
+                waitEvent.Wait();
+                logger.LogInformation($"Exit signal received, cleaning up");
             }
+            logger.LogInformation($"Cleanup completed, terminating");
         }
 
         private static string ReadText(byte[] message, Encoding encoding = null)
